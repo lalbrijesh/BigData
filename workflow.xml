@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow-app xmlns="uri:oozie:workflow:0.2" name="flightWorkflow-wf">
+
+   <start to="mr-node" />
+<action name="mr-node">
+      <map-reduce>
+         <job-tracker>${jobTracker}</job-tracker>
+         <name-node>${nameNode}</name-node>
+         <prepare>
+            <delete path="${nameNode}/user/${wf:user()}/output/${outputDir}" />
+         </prepare>
+         <configuration>
+            <property>
+               <name>mapred.mapper.new-api</name>
+               <value>true</value>
+            </property>
+            <property>
+               <name>mapred.reducer.new-api</name>
+               <value>true</value>
+            </property>
+            <property>
+               <name>mapred.job.queue.name</name>
+               <value>${queueName}</value>
+            </property>
+            <property>
+               <name>mapreduce.map.class</name>
+               <value>Top3Prob$Map</value>
+            </property>
+	    <property>
+               <name>mapreduce.combine.class</name>
+               <value>Top3Prob$Combiner</value>
+            </property>
+            <property>
+               <name>mapreduce.reduce.class</name>
+               <value>Top3Prob$Reduce</value>
+            </property>
+            <property>
+               <name>mapred.output.key.class</name>
+               <value>org.apache.hadoop.io.Text</value>
+            </property>
+            <property>
+               <name>mapred.output.value.class</name>
+               <value>org.apache.hadoop.io.DoubleWritable</value>
+            </property>
+            <property>
+               <name>mapred.map.tasks</name>
+               <value>1</value>
+            </property>
+            <property>
+               <name>mapred.input.dir</name>
+               <value>/user/${wf:user()}/inputData</value>
+            </property>
+            <property>
+               <name>mapred.output.dir</name>
+               <value>/user/${wf:user()}/output/${outputDir}</value>
+            </property>
+         </configuration>
+      </map-reduce>
+      <ok to="mr-node1" />
+      <error to="mr-node1" />
+   </action>
+   
+
+<action name="mr-node1">
+      <map-reduce>
+         <job-tracker>${jobTracker}</job-tracker>
+         <name-node>${nameNode}</name-node>
+         <prepare>
+            <delete path="${nameNode}/user/${wf:user()}/output/${outputDir}" />
+         </prepare>
+         <configuration>
+            <property>
+               <name>mapred.mapper.new-api</name>
+               <value>true</value>
+            </property>
+            <property>
+               <name>mapred.reducer.new-api</name>
+               <value>true</value>
+            </property>
+            <property>
+               <name>mapred.job.queue.name</name>
+               <value>${queueName}</value>
+            </property>
+            <property>
+               <name>mapreduce.map.class</name>
+               <value>AverageTaxi$mapper</value>
+            </property>
+            <property>
+               <name>mapreduce.reduce.class</name>
+               <value>AverageTaxi$reducer</value>
+            </property>
+            <property>
+               <name>mapred.output.key.class</name>
+               <value>org.apache.hadoop.io.Text</value>
+            </property>
+            <property>
+               <name>mapred.output.value.class</name>
+               <value>org.apache.hadoop.io.DoubleWritable</value>
+            </property>
+            <property>
+               <name>mapred.map.tasks</name>
+               <value>1</value>
+            </property>
+            <property>
+               <name>mapred.input.dir</name>
+               <value>/user/${wf:user()}/inputData1</value>
+            </property>
+            <property>
+               <name>mapred.output.dir</name>
+               <value>/user/${wf:user()}/output/WorkFlowOut2</value>
+            </property>
+         </configuration>
+      </map-reduce>
+      <ok to="mr-node2" />
+      <error to="mr-node2" />
+   </action>
+
+<action name="mr-node2">
+      <map-reduce>
+         <job-tracker>${jobTracker}</job-tracker>
+         <name-node>${nameNode}</name-node>
+         <prepare>
+            <delete path="${nameNode}/user/${wf:user()}/output/${outputDir}" />
+         </prepare>
+         <configuration>
+            <property>
+               <name>mapred.mapper.new-api</name>
+               <value>true</value>
+            </property>
+            <property>
+               <name>mapred.reducer.new-api</name>
+               <value>true</value>
+            </property>
+            <property>
+               <name>mapred.job.queue.name</name>
+               <value>${queueName}</value>
+            </property>
+            <property>
+               <name>mapreduce.map.class</name>
+               <value>MostCommonReason$mapper</value>
+            </property>
+            <property>
+               <name>mapreduce.reduce.class</name>
+               <value>MostCommonReason$reducer</value>
+            </property>
+            <property>
+               <name>mapred.output.key.class</name>
+               <value>org.apache.hadoop.io.Text</value>
+            </property>
+            <property>
+               <name>mapred.output.value.class</name>
+               <value>org.apache.hadoop.io.IntWritable</value>
+            </property>
+            <property>
+               <name>mapred.map.tasks</name>
+               <value>1</value>
+            </property>
+            <property>
+               <name>mapred.input.dir</name>
+               <value>/user/${wf:user()}/inputData</value>
+            </property>
+            <property>
+               <name>mapred.output.dir</name>
+               <value>/user/${wf:user()}/output/workFlowOut1</value>
+            </property>
+         </configuration>
+      </map-reduce>
+      <ok to="end" />
+      <error to="fail" />
+   </action>
+
+   <kill name="fail">
+      <message>Map/Reduce failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+   </kill>
+   <end name="end" />
+</workflow-app>
